@@ -24,10 +24,12 @@ namespace hoa{
   // FUNC DEFS
   static void Encoder2D_Ctor(Encoder2D * unit){
 
-    float order = IN0(1);
+    float order = *IN(1);
     
     unit->encoder = (Encoder<Hoa2d,float>::DC *)RTAlloc(unit->mWorld,sizeof(Encoder<Hoa2d,float>::DC(order)));
 
+    new(unit->encoder) Encoder<Hoa2d,float>::DC(order);
+    
     unit->numberOfHarmonics = order*2+1;
     
     unit->encoder->setAzimuth(0.);
@@ -47,29 +49,31 @@ namespace hoa{
 
   static void Encoder2D_process(Encoder2D * unit, int inNumSamples){
     
+    Encoder<Hoa2d, float>::DC * tempEncoder = unit->encoder;
+    
     float * input = IN(0);
-    
+	
     float * azimuth = IN(2);
-
-    float * radius = IN(3);
-
-    float * output = new float[inNumSamples * unit->numberOfHarmonics];
-
-    unit->encoder->setAzimuth(*azimuth);
-    unit->encoder->setRadius(*radius);
     
+    float * radius = IN(3);
+    
+    int nHarmonics = unit->numberOfHarmonics;
+    
+    float output[inNumSamples * nHarmonics];
+    
+    tempEncoder->setAzimuth(*azimuth);
+    tempEncoder->setRadius(*radius);
+       
     for (int i = 0; i < inNumSamples; ++i){
-      unit->encoder->process(input+i, output + i * unit->numberOfHarmonics);
+      tempEncoder->process(input+i, output + i * nHarmonics);
     }
-
+    
     for(int i = 0; i < inNumSamples; ++i){
-      for (int j = 0; j< unit->numberOfHarmonics; ++j){
+      for (int j = 0; j< nHarmonics; ++j){
 	float * out = 	OUT(j);
-	out[i] = output[i * unit->numberOfHarmonics + j];
+	out[i] = output[i * nHarmonics + j];
       }
     }
-    
-    delete [] output;
   }
 
   PluginLoad(Encoder2D){

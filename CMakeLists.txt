@@ -9,6 +9,7 @@ project(HoaLibrary-SuperCollider)
 cmake_minimum_required(VERSION 3.0)
 
 include_directories(
+  header/
   ${HOA_PATH}/Sources
   ${SC_PATH}/include/plugin_interface
   ${SC_PATH}/include/common
@@ -19,8 +20,12 @@ if(APPLE OR WIN32)
 set(CMAKE_SHARED_MODULE_SUFFIX ".scx")
 endif()
 
-add_library(${LIBRARY} MODULE
+add_library(Encoder MODULE
   src/Encoder.cpp
   )
 
-set_property(TARGET ${LIBRARY} PROPERTY CXX_STANDARD 14)
+add_library(Decoder MODULE
+  src/Decoder.cpp
+  )
+
+set_property(TARGET Encoder Decoder PROPERTY CXX_STANDARD 14)
