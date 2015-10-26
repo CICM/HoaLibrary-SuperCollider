@@ -23,9 +23,9 @@ namespace hoa{
   // FUNC DEFS
   static void Decoder2D_Ctor(Decoder2D * unit){
 
-    float order = IN0(1);
+    int order = IN0(0);
     
-    unit->numberOfOutputs = IN0(2);
+    unit->numberOfOutputs = IN0(1);
     
     unit->decoder = (Decoder<Hoa2d,float>::Regular *)RTAlloc(unit->mWorld,sizeof(Decoder<Hoa2d,float>::Regular(order,unit->numberOfOutputs)));
 
@@ -64,13 +64,13 @@ namespace hoa{
     }
        
     for (int i = 0; i < inNumSamples; ++i){
-      tempDecoder->process(input+i * numHarmonics, output + i * numOutputs);
+      tempDecoder->process(input + i * numHarmonics, output + i * numOutputs);
     }
     
     for(int i = 0; i < inNumSamples; ++i){
       for (int j = 0; j< numOutputs; ++j){
 	float * out = 	OUT(j);
-	out[i] = output[i * numHarmonics + j];
+	out[i] = output[i * numOutputs + j];
       }
     }
   }
