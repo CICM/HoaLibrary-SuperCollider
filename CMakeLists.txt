@@ -29,3 +29,5 @@ add_library(Decoder MODULE
   )
 
 set_property(TARGET Encoder Decoder PROPERTY CXX_STANDARD 14)
+target_compile_options(Encoder PUBLIC -O3)
+target_compile_options(Decoder PUBLIC -O3)

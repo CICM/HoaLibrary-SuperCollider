@@ -8,8 +8,9 @@ namespace hoa{
   struct Encoder2D : public Unit {
     Encoder<Hoa2d, float>::DC * encoder;
 
+    float * output;
+    
     int numberOfHarmonics;
-  
   };
 
 
@@ -24,13 +25,15 @@ namespace hoa{
   // FUNC DEFS
   static void Encoder2D_Ctor(Encoder2D * unit){
 
-    float order = *IN(1);
+    float order = IN0(1);
     
     unit->encoder = (Encoder<Hoa2d,float>::DC *)RTAlloc(unit->mWorld,sizeof(Encoder<Hoa2d,float>::DC(order)));
 
     new(unit->encoder) Encoder<Hoa2d,float>::DC(order);
     
     unit->numberOfHarmonics = order*2+1;
+    
+    unit->output = (float*)RTAlloc(unit->mWorld,sizeof(float)* FULLBUFLENGTH * unit->numberOfHarmonics);
     
     unit->encoder->setAzimuth(0.);
 
@@ -45,6 +48,7 @@ namespace hoa{
 
   static void Encoder2D_Dtor(Encoder2D * unit){
     RTFree(unit->mWorld, unit->encoder);
+    RTFree(unit->mWorld, unit->output);
   }
 
   static void Encoder2D_process(Encoder2D * unit, int inNumSamples){
@@ -57,21 +61,23 @@ namespace hoa{
     
     float * radius = IN(3);
     
-    int nHarmonics = unit->numberOfHarmonics;
+    int numHarmonics = unit->numberOfHarmonics;
     
-    float output[inNumSamples * nHarmonics];
+    float * tempOutput = unit->output;
     
-    tempEncoder->setAzimuth(*azimuth);
-    tempEncoder->setRadius(*radius);
+    if(*azimuth != tempEncoder->getAzimuth()) tempEncoder->setAzimuth(*azimuth);
+    
+    if(*radius != tempEncoder->getRadius()) tempEncoder->setRadius(*radius);
        
     for (int i = 0; i < inNumSamples; ++i){
-      tempEncoder->process(input+i, output + i * nHarmonics);
+	
+	tempEncoder->process(input+i, tempOutput + i * numHarmonics);
     }
     
     for(int i = 0; i < inNumSamples; ++i){
-      for (int j = 0; j< nHarmonics; ++j){
+      for (int j = 0; j< numHarmonics; ++j){
 	float * out = 	OUT(j);
-	out[i] = output[i * nHarmonics + j];
+	out[i] = tempOutput[i * numHarmonics + j];
       }
     }
   }

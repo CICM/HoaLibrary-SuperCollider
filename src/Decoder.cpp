@@ -9,6 +9,8 @@ namespace hoa{
   struct Decoder2D : public Unit {
     Decoder<Hoa2d, float>::Regular * decoder;
 
+    float * input, * output;
+    
     int numberOfHarmonics, numberOfOutputs;
   
   };
@@ -46,6 +48,9 @@ namespace hoa{
     new(unit->decoder) Decoder<Hoa2d,float>::Regular(order,unit->numberOfOutputs);
     
     unit->numberOfHarmonics = order*2+1;
+
+    unit->input = (float*)RTAlloc(unit->mWorld,sizeof(float)* unit->numberOfHarmonics * FULLBUFLENGTH);
+    unit->output = (float*)RTAlloc(unit->mWorld,sizeof(float)* unit->numberOfOutputs * FULLBUFLENGTH);
     
     unit->decoder->computeRendering(FULLBUFLENGTH);
     
@@ -56,6 +61,8 @@ namespace hoa{
 
   static void Decoder2D_Dtor(Decoder2D * unit){
     RTFree(unit->mWorld, unit->decoder);
+    RTFree(unit->mWorld, unit->input);
+    RTFree(unit->mWorld, unit->output);
   }
 
   static void Decoder2D_process(Decoder2D * unit, int inNumSamples){
@@ -66,25 +73,25 @@ namespace hoa{
     
     int numHarmonics = unit->numberOfHarmonics;
     
-    float input[inNumSamples * numHarmonics];
+    float * inputs = unit->input;
     
-    float output[inNumSamples * numOutputs];
+    float * outputs = unit->output;
 
 
     for (int i = 0; i<inNumSamples; ++i){
       for (int j = 0; j<numHarmonics; ++j){
-	input[i*numHarmonics + j] = IN(j+2)[i];
+	inputs[i*numHarmonics + j] = IN(j+2)[i];
       }
     }
        
     for (int i = 0; i < inNumSamples; ++i){
-      tempDecoder->process(input + i * numHarmonics, output + i * numOutputs);
+      tempDecoder->process(inputs + i * numHarmonics, outputs + i * numOutputs);
     }
     
     for(int i = 0; i < inNumSamples; ++i){
       for (int j = 0; j< numOutputs; ++j){
 	float * out = 	OUT(j);
-	out[i] = output[i * numOutputs + j];
+	out[i] = outputs[i * numOutputs + j];
       }
     }
   }
@@ -118,16 +125,19 @@ namespace hoa{
 
     int numHarmonics = unit->numberOfHarmonics;
     
-    float ** input = new float *[numHarmonics];
+    float ** input =  (float**)RTAlloc(unit->mWorld,sizeof(float*)*numHarmonics);
 
     for (int i = 0; i < numHarmonics; ++i) input[i] = IN(i+2);
     
-    float ** output = new float * [2];
+    float ** output = (float**)RTAlloc(unit->mWorld, sizeof(float*)*2);
 
     output[0] = OUT(0);
     output[1] = OUT(1);
        
     tempDecoder->processBlock(const_cast<const float **>(input),output);
+
+    RTFree(unit->mWorld,input);
+    RTFree(unit->mWorld,output);
     
   }
  PluginLoad(Decoder){

@@ -15,15 +15,15 @@ Decoder2D : MultiOutUGen{
 
 Decoder2DBinaural : MultiOutUGen{
 
-	*ar{arg inputArray, order = 1, matrixSize = 256, mul = 1.0, add = 0.0;
-		^this.multiNewList(['audio', order, matrixSize] ++ inputArray.asArray).madd(mul,add);
+	*ar{arg inputArray, order = 1, cropSize = 256, mul = 1.0, add = 0.0;
+		^this.multiNewList(['audio', order, cropSize] ++ inputArray.asArray).madd(mul,add);
 	}
-	*kr{arg inputArray, order = 1, matrixSize = 256, mul = 1.0, add = 0.0;
-		^this.multiNewList(['control', order, matrixSize] ++ inputArray.asArray).madd(mul,add);
+	*kr{arg inputArray, order = 1, cropSize = 256, mul = 1.0, add = 0.0;
+		^this.multiNewList(['control', order, cropSize] ++ inputArray.asArray).madd(mul,add);
 	}
 
 	init {arg ... theInputs;
 		inputs = theInputs;
-		^this.initOutputs((2, rate);
+		^this.initOutputs(2, rate);
 	}
 }
