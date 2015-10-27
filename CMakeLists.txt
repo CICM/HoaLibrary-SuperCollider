@@ -9,7 +9,6 @@ project(HoaLibrary-SuperCollider)
 cmake_minimum_required(VERSION 3.0)
 
 include_directories(
-  header/
   ${HOA_PATH}/Sources
   ${SC_PATH}/include/plugin_interface
   ${SC_PATH}/include/common
