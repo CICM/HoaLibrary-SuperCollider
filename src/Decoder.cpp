@@ -5,7 +5,7 @@ static InterfaceTable * ft;
 
 namespace hoa{
 
-  // DECODER REGULAR
+  // DECODER REGULAR 2D
   struct Decoder2D : public Unit {
     Decoder<Hoa2d, float>::Regular * decoder;
 
@@ -14,14 +14,24 @@ namespace hoa{
     int numberOfHarmonics, numberOfOutputs;
   
   };
+  
+  // DECODER IRREGULAR 2D
+  struct Decoder2DIrregular : public Unit {
+    Decoder<Hoa2d, float>::Irregular * decoder;
 
-  // DECODER BINAURAL
+    float * input, * output;
+    
+    int numberOfHarmonics, numberOfOutputs;
+  
+  };
+
+  // DECODER BINAURAL 2D
   struct Decoder2DBinaural : public Unit {
     Decoder<Hoa2d, float>::Binaural * decoder;
     int numberOfHarmonics;
   };
 
-  // DECODER REGULAR
+  // DECODER REGULAR 3D
   struct Decoder3D : public Unit {
     Decoder<Hoa3d, float>::Regular * decoder;
 
@@ -31,7 +41,7 @@ namespace hoa{
   
   };
 
-  // DECODER BINAURAL
+  // DECODER BINAURAL 3D
   struct Decoder3DBinaural : public Unit {
     Decoder<Hoa3d, float>::Binaural * decoder;
     int numberOfHarmonics;
@@ -42,6 +52,12 @@ namespace hoa{
   static void Decoder2D_Ctor(Decoder2D * unit);
   
   static void Decoder2D_Dtor(Decoder2D * unit);
+
+  static void Decoder2DIrregular_process(Decoder2DIrregular * unit, int inNumSamples);
+    
+  static void Decoder2DIrregular_Ctor(Decoder2DIrregular * unit);
+  
+  static void Decoder2DIrregular_Dtor(Decoder2DIrregular * unit);
 
   static void Decoder2DBinaural_process(Decoder2DBinaural * unit, int inNumSamples);
     
@@ -121,6 +137,66 @@ namespace hoa{
     }
   }
 
+  static void Decoder2DIrregular_Ctor(Decoder2DIrregular * unit){
+
+    int order = IN0(0);
+    
+    unit->numberOfOutputs = IN0(1);
+    
+    unit->decoder = (Decoder<Hoa2d,float>::Irregular*)RTAlloc(unit->mWorld,sizeof(Decoder<Hoa2d,float>::Irregular(order, unit->numberOfOutputs)));
+
+    new(unit->decoder) Decoder<Hoa2d,float>::Irregular(order,unit->numberOfOutputs);
+    
+    unit->numberOfHarmonics = order*2+1;
+
+    unit->input = (float*)RTAlloc(unit->mWorld,sizeof(float)* unit->numberOfHarmonics * FULLBUFLENGTH);
+    unit->output = (float*)RTAlloc(unit->mWorld,sizeof(float)* unit->numberOfOutputs * FULLBUFLENGTH);
+    
+    unit->decoder->setPlanewavesRotation(IN0(2),0,0);
+    
+    unit->decoder->computeRendering(FULLBUFLENGTH);
+    
+    SETCALC(Decoder2DIrregular_process);
+    
+    Decoder2DIrregular_process(unit,1);
+  }
+
+  static void Decoder2DIrregular_Dtor(Decoder2DIrregular * unit){
+    RTFree(unit->mWorld, unit->decoder);
+    RTFree(unit->mWorld, unit->input);
+    RTFree(unit->mWorld, unit->output);
+  }
+
+  static void Decoder2DIrregular_process(Decoder2DIrregular * unit, int inNumSamples){
+    
+    Decoder<Hoa2d, float>::Irregular * tempDecoder = unit->decoder;
+    
+    int numOutputs = unit->numberOfOutputs;
+    
+    int numHarmonics = unit->numberOfHarmonics;
+    
+    float * inputs = unit->input;
+    
+    float * outputs = unit->output;
+
+
+    for (int i = 0; i<inNumSamples; ++i){
+      for (int j = 0; j<numHarmonics; ++j){
+	inputs[i*numHarmonics + j] = IN(j+3)[i];
+      }
+    }
+       
+    for (int i = 0; i < inNumSamples; ++i){
+      tempDecoder->process(inputs + i * numHarmonics, outputs + i * numOutputs);
+    }
+    
+    for(int i = 0; i < inNumSamples; ++i){
+      for (int j = 0; j< numOutputs; ++j){
+	float * out = 	OUT(j);
+	out[i] = outputs[i * numOutputs + j];
+      }
+    }
+  }
   static void Decoder2DBinaural_Ctor(Decoder2DBinaural * unit){
 
     int order = IN0(0);
@@ -275,6 +351,7 @@ namespace hoa{
     ft = inTable;
   
     DefineDtorUnit(Decoder2D);
+    DefineDtorUnit(Decoder2DIrregular);
     DefineDtorUnit(Decoder2DBinaural);
     DefineDtorUnit(Decoder3D);
     DefineDtorUnit(Decoder3DBinaural);
