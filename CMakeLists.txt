@@ -1,5 +1,5 @@
 set(SC_PATH ~/GIT/supercollider/)
-set(HOA_PATH ~/GIT/HoaLibrary-light/)
+set(HOA_PATH ThirdParty/HoaLibrary-light/)
 set(LIBRARY HoaLibrary)
 
 include_directories(${SC_PATH}/include/plugin_interface)
