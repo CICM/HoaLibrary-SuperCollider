@@ -1,0 +1,6 @@
+title:: Decoder2D
+categories:: Ugen
+related:: Decoder2DIrregular, Decoder2DBinaural, Decoder3D, Decoder3DIrregular, Decoder3DBinaural, Encoder2D, Encoder3D
+summary:: The HOA Library 2 dimensional decoder. For more information on ambisonics see http://www.mshparisnord.fr/hoalibrary/en
+
+method:: ar
