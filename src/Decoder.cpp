@@ -237,10 +237,10 @@ namespace hoa{
 
 	for (int i = 0; i < numHarmonics; ++i) input[i] = IN(i+2);
 
-	float * output[2];
+	float * output[] = {OUT(0),OUT(1)};
 
-	output[0] = OUT(0);
-	output[1] = OUT(1);
+	//output[0] = OUT(0);
+	//output[1] = OUT(1);
 
 	tempDecoder->processBlock(const_cast<const float **>(input),output);
 

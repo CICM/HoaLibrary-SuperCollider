@@ -1,10 +1,8 @@
 Optim2DMaxRe : MultiOutUGen{
 
 	*ar{arg inputArray, order = 1, mul = 1.0, add = 0.0;
+		if(inputArray.asArray.size  != (order * 2 +1)) {^"Wrong number of Inputs"};
 		^this.multiNewList(['audio', order] ++ inputArray.asArray).madd(mul,add);
-	}
-	*kr{arg inputArray, order = 1, mul = 1.0, add = 0.0;
-		^this.multiNewList(['control', order] ++ inputArray.asArray).madd(mul,add);
 	}
 
 	init {arg ... theInputs;
@@ -16,10 +14,8 @@ Optim2DMaxRe : MultiOutUGen{
 Optim3DMaxRe : MultiOutUGen{
 
 	*ar{arg inputArray, order = 1, mul = 1.0, add = 0.0;
+	if(inputArray.asArray.size  != ((order + 1) * (order + 1))) {^"Wrong number of Inputs"};
 		^this.multiNewList(['audio', order] ++ inputArray.asArray).madd(mul,add);
-	}
-	*kr{arg inputArray, order = 1, mul = 1.0, add = 0.0;
-		^this.multiNewList(['control', order] ++ inputArray.asArray).madd(mul,add);
 	}
 
 	init {arg ... theInputs;
@@ -31,10 +27,8 @@ Optim3DMaxRe : MultiOutUGen{
 Optim2DInPhase : MultiOutUGen{
 
 	*ar{arg inputArray, order = 1, mul = 1.0, add = 0.0;
+		if(inputArray.asArray.size  != (order * 2 +1)) {^"Wrong number of Inputs"};
 		^this.multiNewList(['audio', order] ++ inputArray.asArray).madd(mul,add);
-	}
-	*kr{arg inputArray, order = 1, mul = 1.0, add = 0.0;
-		^this.multiNewList(['control', order] ++ inputArray.asArray).madd(mul,add);
 	}
 
 	init {arg ... theInputs;
@@ -48,10 +42,8 @@ Optim2DInPhase : MultiOutUGen{
 Optim3DInPhase : MultiOutUGen{
 
 	*ar{arg inputArray, order = 1, mul = 1.0, add = 0.0;
+	if(inputArray.asArray.size  != ((order + 1)*(order +1))) {^"Wrong number of Inputs"};
 		^this.multiNewList(['audio', order] ++ inputArray.asArray).madd(mul,add);
-	}
-	*kr{arg inputArray, order = 1, mul = 1.0, add = 0.0;
-		^this.multiNewList(['control', order] ++ inputArray.asArray).madd(mul,add);
 	}
 
 	init {arg ... theInputs;
