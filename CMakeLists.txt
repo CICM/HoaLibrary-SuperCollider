@@ -13,7 +13,7 @@ include_directories(
   ${SC_PATH}/include/plugin_interface
   ${SC_PATH}/include/common
   ${SC_PATH}/external_libraries/libsndfile/)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_SHARED_MODULE_PREFIX "")
 if(APPLE OR WIN32)
 set(CMAKE_SHARED_MODULE_SUFFIX ".scx")

@@ -36,7 +36,7 @@ Decoder2DBinaural : MultiOutUGen{
 
 	init {arg ... theInputs;
 		inputs = theInputs;
-		this.initOutputs(2, rate);
+		^this.initOutputs(2, rate);
 	}
 }
 
