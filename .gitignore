@@ -1,4 +1,4 @@
 build
 build/*
 .ycm*
-notas.txt
+compile_commands.json
