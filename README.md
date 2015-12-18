@@ -2,5 +2,15 @@
 
 This is a SuperCollider plugin of the High Order Ambsionics (HOA) Library.
 It's still in early development stage.
-To compile, change the SuperCollider and HoaLibrary-Light folders in cmake, go to build directory and then run ``cmake ..``
-There's a script which copies the generated files to the correct SuperCollider folder called copy_script.sh, however, it uses my absolute path, so I don't recommend using it.
+
+To compile, choose a path and then execute
+``git clone --recursive``
+``cd HoaLibrary-SuperCollider``
+``mkdir build``
+``cd build``
+``cmake -DSC_PATH=path_to_sc_repository -DSC_PLUGINS_PATH=path_to_sc_plugins ..``
+``make install``
+
+SC\_PLUGINS\_PATH/HoaLibrary is the folder where the files will be installed
+
+This version is not yet complete, notably there are still no help files. 
