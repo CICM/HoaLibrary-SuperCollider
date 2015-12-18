@@ -1,5 +1,7 @@
 set(SC_PATH ~/GIT/supercollider/)
 set(HOA_PATH ThirdParty/HoaLibrary-light/)
+set(SC_PLUGINS_PATH ~/Library/Application\ Support/SuperCollider/Extensions)
+FILE(GLOB SC_CLASS src/sc/Classes/*)
 set(LIBRARY HoaLibrary)
 
 include_directories(${SC_PATH}/include/plugin_interface)
@@ -36,3 +38,12 @@ set_property(TARGET Encoder Decoder Optim PROPERTY CXX_STANDARD 14)
 target_compile_options(Encoder PUBLIC -O3)
 target_compile_options(Decoder PUBLIC -O3)
 target_compile_options(Optim PUBLIC -O3)
+
+install(
+    TARGETS Encoder Decoder Optim
+    LIBRARY DESTINATION ${SC_PLUGINS_PATH}/${LIBRARY}
+    )
+install(
+    FILES ${SC_CLASS}
+    DESTINATION ${SC_PLUGINS_PATH}/${LIBRARY}/Classes 
+    )
