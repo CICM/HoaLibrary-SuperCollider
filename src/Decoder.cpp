@@ -46,6 +46,7 @@ namespace hoa{
     struct Decoder3DBinaural : public Unit {
 	Decoder<Hoa3d, float>::Binaural * decoder;
 	int numberOfHarmonics;
+	float * arrayOfZeros;
     };
 
     static void Decoder2D_process(Decoder2D * unit, int inNumSamples);
@@ -237,7 +238,6 @@ namespace hoa{
 
 	for (int i = 0; i < numHarmonics; ++i) input[i] = IN(i+2);
 
-//	float * output[] = {OUT(0),OUT(1)};
 	float * output[2];
 
 	output[0] = OUT(0);
@@ -349,11 +349,8 @@ namespace hoa{
 	output[1] = OUT(1);
 
 	tempDecoder->processBlock(const_cast<const float **>(input),output);
-
-	RTFree(unit->mWorld,input);
-	RTFree(unit->mWorld,output);
-
     }
+
     PluginLoad(Decoder){
 
 	ft = inTable;
