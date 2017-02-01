@@ -1,5 +1,5 @@
 #include "SC_PlugIn.h"
-#include "Encoder.hpp"
+#include <Encoder.hpp>
 
 static InterfaceTable * ft;
 

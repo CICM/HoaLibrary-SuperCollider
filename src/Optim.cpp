@@ -1,5 +1,5 @@
 #include "SC_PlugIn.h"
-#include "Optim.hpp"
+#include <Optim.hpp>
 
 static InterfaceTable * ft;
 

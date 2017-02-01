@@ -1,7 +1,7 @@
-set(SC_PATH ~/GIT/supercollider/
+set(SC_PATH ~/git/supercollider/
     CACHE PATH "SuperCollider sdk path"
     )
-set(HOA_PATH ThirdParty/HoaLibrary-light/
+set(HOA_PATH ThirdParty/HoaLibrary-Light
     CACHE PATH "HoaLibrary path"
     )
 set(SC_PLUGINS_PATH ~/Library/Application\ Support/SuperCollider/Extensions
