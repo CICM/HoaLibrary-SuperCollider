@@ -5,180 +5,187 @@ static InterfaceTable * ft;
 
 namespace hoa{
 
-	struct Encoder2D : public Unit {
-		Encoder<Hoa2d, float>::DC * encoder;
+    struct Encoder2D : public Unit {
 
-		float * output;
+        Encoder<Hoa2d, float>::DC * encoder;
+        float * output;
+        int numberOfHarmonics;
+    };
 
-		int numberOfHarmonics;
-	};
+    struct Encoder3D : public Unit {
 
-	struct Encoder3D : public Unit {
-		Encoder<Hoa3d, float>::DC * encoder;
+        Encoder<Hoa3d, float>::DC * encoder;
+        float * output;
+        int numberOfHarmonics;
+    };
 
-		float * output;
 
-		int numberOfHarmonics;
-	};
+    static void Encoder2D_process(Encoder2D * unit, int inNumSamples);
 
+    static void Encoder2D_Ctor(Encoder2D * unit);
 
-	static void Encoder2D_process(Encoder2D * unit, int inNumSamples);
+    static void Encoder2D_Dtor(Encoder2D * unit);
 
-	static void Encoder2D_Ctor(Encoder2D * unit);
 
-	static void Encoder2D_Dtor(Encoder2D * unit);
+    static void Encoder3D_process(Encoder3D * unit, int inNumSamples);
 
+    static void Encoder3D_Ctor(Encoder3D * unit);
 
-	static void Encoder3D_process(Encoder3D * unit, int inNumSamples);
+    static void Encoder3D_Dtor(Encoder3D * unit);
 
-	static void Encoder3D_Ctor(Encoder3D * unit);
 
-	static void Encoder3D_Dtor(Encoder3D * unit);
 
+    // FUNC DEFS
+    static void Encoder2D_Ctor(Encoder2D * unit){
 
+        float order = IN0(3);
 
-	// FUNC DEFS
-	static void Encoder2D_Ctor(Encoder2D * unit){
+        auto & tempEncoder = unit->encoder;
 
-		float order = IN0(3);
+        tempEncoder = (Encoder<Hoa2d,float>::DC *)RTAlloc(unit->mWorld,
+                sizeof(Encoder<Hoa2d,float>::DC(order)));
 
-		auto & tempEncoder = unit->encoder;
+        new(tempEncoder) Encoder<Hoa2d,float>::DC(order);
 
-		tempEncoder = (Encoder<Hoa2d,float>::DC *)RTAlloc(unit->mWorld,sizeof(Encoder<Hoa2d,float>::DC(order)));
+        unit->numberOfHarmonics = order*2+1;
 
-		new(tempEncoder) Encoder<Hoa2d,float>::DC(order);
+        unit->output = (float*)RTAlloc(unit->mWorld,
+                sizeof(float)* FULLBUFLENGTH * unit->numberOfHarmonics);
 
-		unit->numberOfHarmonics = order*2+1;
+        tempEncoder->setAzimuth(IN0(1));
 
-		unit->output = (float*)RTAlloc(unit->mWorld,sizeof(float)* FULLBUFLENGTH * unit->numberOfHarmonics);
+        tempEncoder->setRadius(IN0(2));
 
-		tempEncoder->setAzimuth(IN0(1));
+        tempEncoder->setMute(false);
 
-		tempEncoder->setRadius(IN0(2));
+        SETCALC(Encoder2D_process);
 
-		tempEncoder->setMute(false);
+        Encoder2D_process(unit,1);
+    }
 
-		SETCALC(Encoder2D_process);
+    static void Encoder2D_Dtor(Encoder2D * unit){
+        RTFree(unit->mWorld, unit->encoder);
+        RTFree(unit->mWorld, unit->output);
+    }
 
-		Encoder2D_process(unit,1);
-	}
+    static void Encoder2D_process(Encoder2D * unit, int inNumSamples){
 
-	static void Encoder2D_Dtor(Encoder2D * unit){
-		RTFree(unit->mWorld, unit->encoder);
-		RTFree(unit->mWorld, unit->output);
-	}
+        auto & tempEncoder = unit->encoder;
 
-	static void Encoder2D_process(Encoder2D * unit, int inNumSamples){
+        float * input = IN(0);
 
-		auto & tempEncoder = unit->encoder;
+        float * azimuth = IN(1);
 
-		float * input = IN(0);
+        float * radius = IN(2);
 
-		float * azimuth = IN(1);
+        int numHarmonics = unit->numberOfHarmonics;
 
-		float * radius = IN(2);
+        float * tempOutput = unit->output;
 
-		int numHarmonics = unit->numberOfHarmonics;
+        if(*azimuth != tempEncoder->getAzimuth())
+            tempEncoder->setAzimuth(*azimuth);
 
-		float * tempOutput = unit->output;
+        if(*radius != tempEncoder->getRadius())
+            tempEncoder->setRadius(*radius);
 
-		if(*azimuth != tempEncoder->getAzimuth()) tempEncoder->setAzimuth(*azimuth);
+        for (int i = 0; i < inNumSamples; ++i){
 
-		if(*radius != tempEncoder->getRadius()) tempEncoder->setRadius(*radius);
+            tempEncoder->process(input+i, tempOutput + i * numHarmonics);
+        }
 
-		for (int i = 0; i < inNumSamples; ++i){
+        for(int i = 0; i < inNumSamples; ++i){
+            for (int j = 0; j< numHarmonics; ++j){
+                float * out = OUT(j);
+                out[i] = tempOutput[i * numHarmonics + j];
+            }
+        }
+    }
 
-			tempEncoder->process(input+i, tempOutput + i * numHarmonics);
-		}
+    // FUNC DEFS
+    static void Encoder3D_Ctor(Encoder3D * unit){
 
-		for(int i = 0; i < inNumSamples; ++i){
-			for (int j = 0; j< numHarmonics; ++j){
-				float * out = 	OUT(j);
-				out[i] = tempOutput[i * numHarmonics + j];
-			}
-		}
-	}
+        float * azimuth = IN(1);
 
-	// FUNC DEFS
-	static void Encoder3D_Ctor(Encoder3D * unit){
+        float * elevation = IN(2);
 
-		float * azimuth = IN(1);
+        float * radius = IN(3);
 
-		float * elevation = IN(2);
+        float order = IN0(4);
 
-		float * radius = IN(3);
+        auto & tempEncoder = unit->encoder;
 
-		float order = IN0(4);
+        tempEncoder = (Encoder<Hoa3d,float>::DC *)RTAlloc(unit->mWorld,
+                sizeof(Encoder<Hoa3d,float>::DC(order)));
 
-		auto & tempEncoder = unit->encoder;
+        new(tempEncoder) Encoder<Hoa3d,float>::DC(order);
 
-		tempEncoder = (Encoder<Hoa3d,float>::DC *)RTAlloc(unit->mWorld,sizeof(Encoder<Hoa3d,float>::DC(order)));
+        unit->numberOfHarmonics = (order+1) * (order+1);
 
-		new(tempEncoder) Encoder<Hoa3d,float>::DC(order);
+        unit->output = (float*)RTAlloc(unit->mWorld,
+                sizeof(float)* FULLBUFLENGTH * unit->numberOfHarmonics);
 
-		unit->numberOfHarmonics = (order+1) * (order+1);
+        tempEncoder->setAzimuth(*azimuth);
 
-		unit->output = (float*)RTAlloc(unit->mWorld,sizeof(float)* FULLBUFLENGTH * unit->numberOfHarmonics);
+        tempEncoder->setElevation(*elevation);
 
-		tempEncoder->setAzimuth(*azimuth);
+        tempEncoder->setRadius(*radius);
 
-		tempEncoder->setElevation(*elevation);
+        tempEncoder->setMute(false);
 
-		tempEncoder->setRadius(*radius);
+        SETCALC(Encoder3D_process);
 
-		tempEncoder->setMute(false);
+        Encoder3D_process(unit,1);
+    }
 
-		SETCALC(Encoder3D_process);
+    static void Encoder3D_Dtor(Encoder3D * unit){
+        RTFree(unit->mWorld, unit->encoder);
+        RTFree(unit->mWorld, unit->output);
+    }
 
-		Encoder3D_process(unit,1);
-	}
+    static void Encoder3D_process(Encoder3D * unit, int inNumSamples){
 
-	static void Encoder3D_Dtor(Encoder3D * unit){
-		RTFree(unit->mWorld, unit->encoder);
-		RTFree(unit->mWorld, unit->output);
-	}
+        auto & tempEncoder = unit->encoder;
 
-	static void Encoder3D_process(Encoder3D * unit, int inNumSamples){
+        auto & input = IN(0);
 
-		auto & tempEncoder = unit->encoder;
+        auto & azimuth = IN(1);
 
-		auto & input = IN(0);
+        auto & elevation = IN(2);
 
-		auto & azimuth = IN(1);
+        auto & radius = IN(3);
 
-		auto & elevation = IN(2);
+        int numHarmonics = unit->numberOfHarmonics;
 
-		auto & radius = IN(3);
+        auto & tempOutput = unit->output;
 
-		int numHarmonics = unit->numberOfHarmonics;
+        if(*azimuth != tempEncoder->getAzimuth())
+            tempEncoder->setAzimuth(*azimuth);
 
-		auto & tempOutput = unit->output;
+        if(*elevation != tempEncoder->getElevation())
+            tempEncoder->setElevation(*elevation);
 
-		if(*azimuth != tempEncoder->getAzimuth()) tempEncoder->setAzimuth(*azimuth);
+        if(*radius != tempEncoder->getRadius())
+            tempEncoder->setRadius(*radius);
 
-		if(*elevation != tempEncoder->getElevation()) tempEncoder->setElevation(*elevation);
+        for (int i = 0; i < inNumSamples; ++i){
 
-		if(*radius != tempEncoder->getRadius()) tempEncoder->setRadius(*radius);
+            tempEncoder->process(input+i, tempOutput + i * numHarmonics);
+        }
 
-		for (int i = 0; i < inNumSamples; ++i){
+        for(int i = 0; i < inNumSamples; ++i){
+            for (int j = 0; j< numHarmonics; ++j){
+                float * out = OUT(j);
+                out[i] = tempOutput[i * numHarmonics + j];
+            }
+        }
+    }
 
-			tempEncoder->process(input+i, tempOutput + i * numHarmonics);
-		}
+    PluginLoad(Encoder){
 
-		for(int i = 0; i < inNumSamples; ++i){
-			for (int j = 0; j< numHarmonics; ++j){
-				float * out = 	OUT(j);
-				out[i] = tempOutput[i * numHarmonics + j];
-			}
-		}
-	}
+        ft = inTable;
 
-	PluginLoad(Encoder){
+        DefineDtorUnit(Encoder2D);
+        DefineDtorUnit(Encoder3D);
 
-		ft = inTable;
-
-		DefineDtorUnit(Encoder2D);
-		DefineDtorUnit(Encoder3D);
-
-	}
+    }
 }
