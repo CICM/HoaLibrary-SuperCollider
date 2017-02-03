@@ -1,4 +1,5 @@
-#include "SC_PlugIn.h" #include <Decoder.hpp>
+#include "SC_PlugIn.h"
+#include <Decoder.hpp>
 
 static InterfaceTable * ft;
 
