@@ -53,7 +53,7 @@ add_library(Optim MODULE
     src/Optim.cpp
     )
 
-set_property(TARGET Encoder Decoder Optim PROPERTY CXX_STANDARD 14)
+set_property(TARGET Encoder Decoder Optim PROPERTY CXX_STANDARD 11)
 
 target_compile_options(Encoder PUBLIC -O3)
 target_compile_options(Decoder PUBLIC -O3)
